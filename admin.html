@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Clientes</title>
+    <!-- Carregando o Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Fonte Inter */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-8">
+
+    <div class="container mx-auto max-w-5xl">
+        <h1 class="text-3xl font-bold text-green-400 mb-6">
+            ⚽ Painel de Clientes (Fut Ao Vivo)
+        </h1>
+        <p class="text-gray-300 mb-8">
+            Lista de usuários cadastrados para assistir aos jogos. Os dados são atualizados em tempo real.
+        </p>
+
+        <!-- Tabela de Clientes -->
+        <div class="bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-gray-700">
+                    <tr>
+                        <th class="p-4 font-semibold uppercase text-sm text-gray-300">Nome Completo</th>
+                        <th class="p-4 font-semibold uppercase text-sm text-gray-300">WhatsApp</th>
+                        <th class="p-4 font-semibold uppercase text-sm text-gray-300">Data de Cadastro</th>
+                    </tr>
+                </thead>
+                <tbody id="clientes-tabela-body" class="divide-y divide-gray-700">
+                    <!-- Linha de Carregamento Inicial -->
+                    <tr>
+                        <td colspan="3" class="p-4 text-center text-gray-400">
+                            Carregando clientes...
+                        </td>
+                    </tr>
+                    <!-- Dados dos clientes serão inseridos aqui via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Scripts do Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, query, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Configuração do Firebase (Manual) ---
+
+        // ==============================================================================
+        // == IMPORTANTE: COLE A SUA CONFIGURAÇÃO DO FIREBASE AQUI ==
+        // ==============================================================================
+        // DEVE SER O MESMO OBJETO `firebaseConfig` QUE VOCÊ USOU NO `index.html`.
+        const firebaseConfig = {
+            apiKey: "AIzaSyB8CRcynG97ZLVf24wt9ylbs2kemYk6oSU",
+  authDomain: "barbercontrol-6b1f1.firebaseapp.com",
+  projectId: "barbercontrol-6b1f1",
+  storageBucket: "barbercontrol-6b1f1.firebasestorage.app",
+  messagingSenderId: "984412023617",
+  appId: "1:984412023617:web:1b10bf21e1ec3a63bf0fc0",
+  measurementId: "G-JR9PJSCHWG"
+        };
+        // ==============================================================================
+        
+        let app, db, auth;
+        let userId;
+
+        // Caminho da coleção (DEVE SER O MESMO DO INDEX.HTML)
+        const clientesCollectionPath = `clientes`;
+        
+        const tabelaBody = document.getElementById('clientes-tabela-body');
+
+        try {
+            // Validação básica da config
+            if (!firebaseConfig.apiKey || firebaseConfig.apiKey.includes("COLE-AQUI")) {
+                 throw new Error("Configuração do Firebase não foi preenchida.");
+            }
+
+            // Aqui inicializamos a conexão usando a configuração acima
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            setLogLevel('Debug'); // Para ver logs no console
+
+            // Autenticar
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userId = user.uid;
+                    console.log("Admin autenticado:", userId);
+                    // Usuário está logado, buscar dados
+                    setupRealtimeListener();
+                } else {
+                    try {
+                        console.log("Autenticando admin anonimamente...");
+                        // Tenta logar anonimamente
+                        await signInAnonymously(auth);
+                    } catch (authError) {
+                        console.error("Erro ao autenticar admin:", authError);
+                        tabelaBody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-red-400">Erro de autenticação. Verifique o console.</td></tr>`;
+                    }
+                }
+            });
+        } catch (e) {
+            console.error("Erro ao inicializar o Firebase:", e);
+            tabelaBody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-red-400">${e.message.includes("Configuração") ? "Erro: A chave do Firebase não foi configurada." : "Erro de conexão. Tente atualizar a página."}</td></tr>`;
+        }
+        // --- Fim Configuração Firebase ---
+
+        
+        // Função para escutar as mudanças no Firestore em tempo real
+        function setupRealtimeListener() {
+            if (!db) {
+                console.error("Firestore (db) não está inicializado.");
+                tabelaBody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-red-400">Erro de conexão com o banco de dados.</td></tr>`;
+                return;
+            }
+
+            const clientesCollection = collection(db, clientesCollectionPath);
+            const q = query(clientesCollection); // Sem ordenação (proibido por regras)
+
+            onSnapshot(q, (querySnapshot) => {
+                console.log("Recebidos", querySnapshot.size, "documentos.");
+                // Limpa a tabela
+                tabelaBody.innerHTML = ''; 
+
+                if (querySnapshot.empty) {
+                    tabelaBody.innerHTML = `
+                        <tr>
+                            <td colspan="3" class="p-4 text-center text-gray-400">
+                                Nenhum cliente cadastrado ainda.
+                            </td>
+                        </tr>`;
+                    return;
+                }
+
+                // Processa e ordena em memória (JS)
+                const clientes = [];
+                querySnapshot.forEach((doc) => {
+                    clientes.push(doc.data());
+                });
+
+                // Ordena por data (mais recente primeiro) - em memória
+                clientes.sort((a, b) => {
+                    const dateA = a.dataCadastro?.toDate() || 0;
+                    const dateB = b.dataCadastro?.toDate() || 0;
+                    return dateB - dateA; // Ordem descendente
+                });
+
+                // Adiciona dados na tabela
+                clientes.forEach(data => {
+                    const newRow = document.createElement('tr');
+                    newRow.className = 'hover:bg-gray-700 transition-colors';
+
+                    const nome = data.nome || 'N/A';
+                    const whatsapp = data.whatsapp || 'N/A';
+                    
+                    // Formata a data
+                    let dataFormatada = 'N/A';
+                    if (data.dataCadastro && data.dataCadastro.toDate) {
+                        dataFormatada = data.dataCadastro.toDate().toLocaleString('pt-BR', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                    }
+
+                    newRow.innerHTML = `
+                        <td class="p-4">${nome}</td>
+                        <td class="p-4">${whatsapp}</td>
+                        <td class="p-4 text-sm text-gray-300">${dataFormatada}</td>
+                    `;
+                    tabelaBody.appendChild(newRow);
+                });
+
+            }, (error) => {
+                console.error("Erro ao buscar dados (onSnapshot):", error);
+                tabelaBody.innerHTML = `
+                    <tr>
+                        <td colspan="3" class="p-4 text-center text-red-400">
+                            Erro ao carregar os dados. Verifique o console.
+                        </td>
+                    </tr>`;
+            });
+        }
+
+    </script>
+</body>
+</html>

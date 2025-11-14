@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futebol Ao Vivo</title>
+    <!-- Carregando o Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Fonte Inter */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Esconde a barra de rolagem */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        /* Animação de spinner */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .spinner {
+            animation: spin 1s linear infinite;
+            border-width: 3px; /* Deixa o spinner um pouco mais fino */
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 antialiased">
+
+    <!-- 
+      ==========================================================================
+      == PÁGINA 1: CADASTRO (ID: cadastro-pagina)
+      ==========================================================================
+    -->
+    <main id="cadastro-pagina" class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-gray-800 shadow-2xl rounded-xl p-8 max-w-md w-full border border-gray-700">
+            <h1 class="text-2xl font-bold text-center mb-2 text-white">
+                <span class="text-3xl">⚽</span> Bem-vindo ao Fut Ao Vivo
+            </h1>
+            <p class="text-center text-gray-400 mb-6">
+                Para acessar o jogo, por favor, preencha seus dados.
+            </p>
+
+            <form id="cadastro-form">
+                <div class="mb-4">
+                    <label for="nome" class="block text-sm font-medium text-gray-300 mb-2">Nome Completo</label>
+                    <input type="text" id="nome" name="nome" placeholder="Seu nome completo" required
+                           class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors">
+                </div>
+                
+                <div class="mb-6">
+                    <label for="whatsapp" class="block text-sm font-medium text-gray-300 mb-2">WhatsApp</label>
+                    <input type="tel" id="whatsapp" name="whatsapp" placeholder="Seu número com DDD" required
+                           class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors">
+                </div>
+                
+                <!-- Mensagem de Erro (escondida por padrão) -->
+                <p id="error-msg" class="text-red-400 text-sm mt-4 text-center hidden"></p>
+                
+                <!-- Botão de Entrar (começa desabilitado) -->
+                <button type="submit" id="entrar-btn" 
+                        class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-5 rounded-lg transition-colors duration-300 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-wait" 
+                        disabled>
+                    Conectando...
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- 
+      ==========================================================================
+      == PÁGINA 2: APP DE FUTEBOL / PLAYER (ID: app-pagina)
+      ==========================================================================
+    -->
+    <section id="app-pagina" class="min-h-screen hidden">
+        <header class="bg-gray-800 p-4 flex justify-between items-center shadow-lg border-b border-gray-700">
+            <h1 class="text-xl font-bold text-white">
+                <span class="text-green-400">FUT</span> AO VIVO
+            </h1>
+            <div class="text-sm text-green-400 flex items-center">
+                <span class="w-3 h-3 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+                AO VIVO
+            </div>
+        </header>
+
+        <!-- Container Principal do App -->
+        <div class="container mx-auto max-w-5xl p-4">
+            
+            <!-- Player de Vídeo -->
+            <div id="video-player-container" class="aspect-video bg-black rounded-xl overflow-hidden shadow-2xl border border-gray-700">
+                <!-- 
+                  IMPORTANTE: Substitua este <div> pelo seu <iframe> ou <video>
+                -->
+                <div class="w-full h-full flex items-center justify-center text-gray-500">
+                    <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span class="ml-4 text-xl">Seu player de vídeo vai aqui</span>
+                </div>
+            </div>
+
+            <!-- Informações da Partida -->
+            <div class="mt-6 bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-700">
+                <h2 class="text-2xl font-bold text-white mb-4">Final da Copa</h2>
+                <div class="flex justify-around items-center">
+                    <div class="text-center">
+                        <img src="https://placehold.co/80x80/374151/FFF?text=T1" alt="Time 1" class="rounded-full mx-auto mb-2 border-2 border-gray-600">
+                        <span class="text-lg font-semibold">Time da Casa</span>
+                    </div>
+                    <div class="text-center">
+                        <span class="text-4xl font-bold text-green-400">2 - 1</span>
+                        <p class="text-sm text-gray-400 mt-1">40' 2º Tempo</p>
+                    </div>
+                    <div class="text-center">
+                        <img src="https://placehold.co/80x80/374151/FFF?text=T2" alt="Time 2" class="rounded-full mx-auto mb-2 border-2 border-gray-600">
+                        <span class="text-lg font-semibold">Visitante</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 
+      ==========================================================================
+      == PÁGINA 3: MODAL DE PAGAMENTO / PAYWALL (ID: paywall-modal)
+      ==========================================================================
+      *** MODIFICADO PARA INTEGRAÇÃO COM MERCADO PAGO (VIA CLOUD FUNCTIONS) ***
+    -->
+    <div id="paywall-modal" class="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-gray-800 rounded-xl p-8 max-w-sm w-full shadow-2xl border border-gray-700 transform transition-all scale-95 opacity-0 animate-fade-in">
+            <h2 class="text-2xl font-bold text-center text-white mb-4">Tempo Esgotado!</h2>
+            <p class="text-gray-300 text-center mb-6">
+                Para continuar assistindo, realize o pagamento via Pix.
+            </p>
+            
+            <!-- 
+              *** NOVO CONTAINER DE PAGAMENTO DINÂMICO ***
+              Este container será preenchido pelo JavaScript com:
+              1. Spinner (Carregando...)
+              2. QR Code (Vindo da Cloud Function)
+              3. Mensagem de "Aguardando Pagamento"
+              4. Mensagem de "Pagamento Aprovado"
+            -->
+            <div id="payment-status" class="w-full aspect-square bg-gray-700 rounded-lg mb-6 flex items-center justify-center text-center p-4">
+                <!-- O conteúdo aqui será inserido dinamicamente -->
+            </div>
+            
+            <p id="payment-instructions" class="text-sm text-gray-400 text-center mb-6">
+                Escaneie o código acima...
+            </p>
+        </div>
+    </div>
+    
+    <!-- Efeito de fade-in para o modal -->
+    <style>
+        @keyframes fade-in {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fade-in {
+            animation: fade-in 0.3s ease-out forwards;
+        }
+    </style>
+
+
+    <!-- 
+      ==========================================================================
+      == JAVASCRIPT
+      ==========================================================================
+    -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, setLogLevel, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // *** IMPORTAÇÃO DAS CLOUD FUNCTIONS ***
+        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js";
+
+
+        // --- Configuração do Firebase (Manual) ---
+        const firebaseConfig = {
+             apiKey: "AIzaSyB8CRcynG97ZLVf24wt9ylbs2kemYk6oSU",
+  authDomain: "barbercontrol-6b1f1.firebaseapp.com",
+  projectId: "barbercontrol-6b1f1",
+  storageBucket: "barbercontrol-6b1f1.firebasestorage.app",
+  messagingSenderId: "984412023617",
+  appId: "1:984412023617:web:1b10bf21e1ec3a63bf0fc0",
+  measurementId: "G-JR9PJSCHWG"
+        };
+        // --- Fim Configuração Firebase ---
+
+        let app, db, auth, functions, userId;
+        let clientesCollection;
+        // Caminho da coleção (simplificado para 'clientes')
+        const clientesCollectionPath = `clientes`; 
+        const paymentsCollectionPath = `payments`;
+        
+        // --- Elementos da UI ---
+        const cadastroPage = document.getElementById('cadastro-pagina'); // Página 1
+        const appPage = document.getElementById('app-pagina');       // Página 2
+        const paywallModal = document.getElementById('paywall-modal'); // Página 3
+        const cadastroForm = document.getElementById('cadastro-form');
+        const nomeInput = document.getElementById('nome');
+        const whatsappInput = document.getElementById('whatsapp');
+        const errorMsg = document.getElementById('error-msg');
+        const entrarBtn = document.getElementById('entrar-btn');
+        const paymentStatusEl = document.getElementById('payment-status');
+        const paymentInstructionsEl = document.getElementById('payment-instructions');
+        
+        let paywallTimer;
+        let unsubscribePaymentListener; // Para parar de ouvir o pagamento
+        // --- Fim Elementos da UI ---
+        
+
+        // Função para inicializar e autenticar no Firebase
+        async function initializeAuth() {
+            try {
+                if (!firebaseConfig.apiKey || firebaseConfig.apiKey.includes("COLE-AQUI")) {
+                    throw new Error("Configuração do Firebase não foi preenchida.");
+                }
+
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                functions = getFunctions(app); // Inicializa as Cloud Functions
+                setLogLevel('Debug'); 
+                clientesCollection = collection(db, clientesCollectionPath);
+
+                await new Promise((resolve, reject) => {
+                    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+                        unsubscribe(); 
+                        if (user) {
+                            resolve(user); 
+                        } else {
+                            try {
+                                await signInAnonymously(auth);
+                                resolve(auth.currentUser); 
+                            } catch (authError) {
+                                reject(authError); 
+                            }
+                        }
+                    });
+                });
+
+                // SUCESSO NA AUTENTICAÇÃO
+                userId = auth.currentUser?.uid || crypto.randomUUID();
+                console.log("Autenticação concluída. Habilitando formulário.");
+                entrarBtn.disabled = false;
+                entrarBtn.textContent = 'Acessar o Jogo';
+
+            } catch (e) {
+                // FALHA NA AUTENTICAÇÃO
+                console.error("Erro fatal ao inicializar ou autenticar:", e);
+                errorMsg.textContent = e.message.includes("Configuração") 
+                    ? "Erro: A chave do Firebase não foi configurada." 
+                    : "Erro de conexão. Tente atualizar a página.";
+                errorMsg.classList.remove('hidden');
+                entrarBtn.textContent = 'Erro de Conexão';
+            }
+        }
+        
+        initializeAuth();
+
+
+        // Listener do formulário (PÁGINA 1)
+        cadastroForm.addEventListener('submit', async (event) => {
+            event.preventDefault(); 
+            
+            if (!nomeInput.value.trim() || !whatsappInput.value.trim()) {
+                errorMsg.textContent = 'Por favor, preencha todos os campos.';
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            entrarBtn.disabled = true;
+            entrarBtn.textContent = 'Entrando...';
+            errorMsg.classList.add('hidden');
+
+            try {
+                // Salva os dados no Firestore
+                const docRef = await addDoc(clientesCollection, {
+                    nome: nomeInput.value.trim(),
+                    whatsapp: whatsappInput.value.trim(),
+                    dataCadastro: serverTimestamp(),
+                    userId: userId 
+                });
+                
+                console.log("Cliente salvo com ID:", docRef.id);
+
+                // NAVEGAÇÃO: Esconde PÁGINA 1 e Mostra PÁGINA 2
+                cadastroPage.classList.add('hidden');
+                appPage.classList.remove('hidden');
+
+                // Inicia o Timer do Paywall (2 minutos)
+                const doisMinutos = 2 * 60 * 1000;
+                paywallTimer = setTimeout(showPaywall, doisMinutos);
+
+            } catch (error) {
+                console.error("Erro ao salvar dados:", error);
+                errorMsg.textContent = 'Erro ao salvar. Tente novamente.';
+                errorMsg.classList.remove('hidden');
+                entrarBtn.disabled = false;
+                entrarBtn.textContent = 'Acessar o Jogo';
+            }
+        });
+
+        // ========================================================================
+        // == NOVA LÓGICA DE PAGAMENTO (MERCADO PAGO)
+        // ========================================================================
+
+        // MOSTRA A PÁGINA 3 (Paywall) e inicia a geração do PIX
+        async function showPaywall() {
+            if (paywallModal.classList.contains('hidden')) {
+                console.log("Timer esgotado! Mostrando PÁGINA 3.");
+                paywallModal.classList.remove('hidden');
+                
+                // Limpa o listener anterior (se houver)
+                if (unsubscribePaymentListener) {
+                    unsubscribePaymentListener();
+                }
+
+                // Inicia o processo de geração do PIX
+                await gerarPagamentoPIX();
+            }
+        }
+
+        // 1. CHAMA A CLOUD FUNCTION PARA CRIAR O PIX
+        async function gerarPagamentoPIX() {
+            // Mostra o spinner
+            paymentStatusEl.innerHTML = `
+                <div class="flex flex-col items-center justify-center">
+                    <div class="spinner w-12 h-12 border-t-green-400 border-gray-600 rounded-full"></div>
+                    <span class="mt-4 text-gray-300">Gerando cobrança PIX...</span>
+                </div>`;
+            paymentInstructionsEl.textContent = "Aguarde, conectando ao sistema de pagamento.";
+
+            try {
+                // *** CHAVE DA LÓGICA ***
+                // Chama a Cloud Function que você DEVE criar no Firebase.
+                // O nome 'createPixPayment' é um exemplo.
+                const createPix = httpsCallable(functions, 'createPixPayment');
+                
+                // Envia dados para a função (ex: valor, item, ID do usuário)
+                const result = await createPix({ 
+                    amount: 1.00, // Ex: 1 Real
+                    description: 'Acesso Jogo Ao Vivo',
+                    userId: userId 
+                });
+
+                // A Cloud Function DEVE retornar o ID do pagamento e o QR Code
+                const { paymentId, qrCodeBase64 } = result.data;
+                
+                if (!paymentId || !qrCodeBase64) {
+                    throw new Error("Resposta inválida da Cloud Function.");
+                }
+
+                console.log("PIX Gerado. Payment ID:", paymentId);
+                
+                // 2. MOSTRA O QR CODE REAL
+                paymentStatusEl.innerHTML = `
+                    <img src="data:image/png;base64,${qrCodeBase64}" alt="QR Code PIX" class="w-full h-full object-contain rounded-lg">
+                `;
+                paymentInstructionsEl.textContent = "Aguardando pagamento... (Escaneie o código)";
+
+                // 3. COMEÇA A OUVIR O PAGAMENTO
+                listenForPayment(paymentId);
+
+            } catch (error) {
+                console.error("Erro ao gerar PIX:", error);
+                paymentStatusEl.innerHTML = `<span class="text-red-400">Erro ao gerar cobrança. Tente atualizar.</span>`;
+                paymentInstructionsEl.textContent = "Houve um erro no sistema de pagamento.";
+            }
+        }
+
+        // 4. OUVE O DOCUMENTO NO FIRESTORE (QUE O WEBHOOK VAI ATUALIZAR)
+        function listenForPayment(paymentId) {
+            console.log("Ouvindo documento:", `${paymentsCollectionPath}/${paymentId}`);
+            
+            const paymentDocRef = doc(db, paymentsCollectionPath, paymentId);
+            
+            // Salva a função 'unsubscribe' para poder parar de ouvir depois
+            unsubscribePaymentListener = onSnapshot(paymentDocRef, (doc) => {
+                if (doc.exists()) {
+                    const paymentData = doc.data();
+                    console.log("Status do pagamento:", paymentData.status);
+                    
+                    // O seu Webhook (no servidor) deve atualizar este campo
+                    if (paymentData.status === 'approved' || paymentData.status === 'APROVADO') {
+                        // 5. PAGAMENTO APROVADO!
+                        paymentStatusEl.innerHTML = `
+                            <div class="flex flex-col items-center justify-center text-green-400">
+                                <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                <span class="mt-4 text-xl font-bold">Pagamento Aprovado!</span>
+                            </div>`;
+                        paymentInstructionsEl.textContent = "Liberando o acesso...";
+                        
+                        // Para de ouvir
+                        unsubscribePaymentListener();
+                        
+                        // Fecha o modal e libera o vídeo
+                        setTimeout(hidePaywall, 2000); // Espera 2s para o usuário ler
+                    }
+                } else {
+                    console.log("Documento de pagamento (ainda) não existe.");
+                }
+            }, (error) => {
+                console.error("Erro ao ouvir pagamento:", error);
+                // Não trava o usuário, mas loga o erro
+            });
+        }
+
+        // Função que ESCONDE A PÁGINA 3 (Paywall)
+        function hidePaywall() {
+            console.log("Pagamento confirmado. Escondendo PÁGINA 3.");
+            paywallModal.classList.add('hidden'); // ESCONDE A JANELA
+            
+            if (paywallTimer) {
+                clearTimeout(paywallTimer);
+            }
+            if (unsubscribePaymentListener) {
+                unsubscribePaymentListener(); // Garante que parou de ouvir
+            }
+        }
+
+    </script>
+
+</body>
+</html>
