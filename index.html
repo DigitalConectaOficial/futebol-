@@ -34,6 +34,7 @@
       ==========================================================================
     -->
     <main id="cadastro-pagina" class="min-h-screen flex items-center justify-center p-4">
+        <!-- ... (HTML PÁGINA 1 - Sem alteração) ... -->
         <div class="bg-gray-800 shadow-2xl rounded-xl p-8 max-w-md w-full border border-gray-700">
             <h1 class="text-2xl font-bold text-center mb-2 text-white">
                 <span class="text-3xl">⚽</span> Bem-vindo ao Fut Ao Vivo
@@ -74,6 +75,7 @@
       ==========================================================================
     -->
     <section id="app-pagina" class="min-h-screen hidden">
+        <!-- ... (HTML PÁGINA 2 - Sem alteração) ... -->
         <header class="bg-gray-800 p-4 flex justify-between items-center shadow-lg border-b border-gray-700">
             <h1 class="text-xl font-bold text-white">
                 <span class="text-green-400">FUT</span> AO VIVO
@@ -124,23 +126,15 @@
       ==========================================================================
       == PÁGINA 3: MODAL DE PAGAMENTO / PAYWALL (ID: paywall-modal)
       ==========================================================================
-      *** MODIFICADO PARA INTEGRAÇÃO COM MERCADO PAGO (VIA CLOUD FUNCTIONS) ***
     -->
     <div id="paywall-modal" class="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <!-- ... (HTML PÁGINA 3 - Sem alteração) ... -->
         <div class="bg-gray-800 rounded-xl p-8 max-w-sm w-full shadow-2xl border border-gray-700 transform transition-all scale-95 opacity-0 animate-fade-in">
             <h2 class="text-2xl font-bold text-center text-white mb-4">Tempo Esgotado!</h2>
             <p class="text-gray-300 text-center mb-6">
                 Para continuar assistindo, realize o pagamento via Pix.
             </p>
             
-            <!-- 
-              *** NOVO CONTAINER DE PAGAMENTO DINÂMICO ***
-              Este container será preenchido pelo JavaScript com:
-              1. Spinner (Carregando...)
-              2. QR Code (Vindo da Cloud Function)
-              3. Mensagem de "Aguardando Pagamento"
-              4. Mensagem de "Pagamento Aprovado"
-            -->
             <div id="payment-status" class="w-full aspect-square bg-gray-700 rounded-lg mb-6 flex items-center justify-center text-center p-4">
                 <!-- O conteúdo aqui será inserido dinamicamente -->
             </div>
@@ -151,7 +145,6 @@
         </div>
     </div>
     
-    <!-- Efeito de fade-in para o modal -->
     <style>
         @keyframes fade-in {
             from { opacity: 0; transform: scale(0.95); }
@@ -172,36 +165,33 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, serverTimestamp, setLogLevel, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        // *** IMPORTAÇÃO DAS CLOUD FUNCTIONS ***
-        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js";
+        // *** REMOVIDA IMPORTAÇÃO DAS CLOUD FUNCTIONS ***
+        // import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js";
 
 
         // ==============================================================================
-        // == IMPORTANTE: COLE A SUA CONFIGURAÇÃO DO FIREBASE AQUI ==
+        // == CONFIGURAÇÃO DO FIREBASE (VOCÊ JÁ COLOU, ESTÁ CORRETO)
         // ==============================================================================
-        // (Você consegue isso no painel do seu projeto no Firebase, ao adicionar um App Web)
         const firebaseConfig = {
             apiKey: "AIzaSyDD263bukJ3gZioOhK0mp7VNM1ECV2XFfA",
-  authDomain: "futebol-72bbe.firebaseapp.com",
-  projectId: "futebol-72bbe",
-  storageBucket: "futebol-72bbe.firebasestorage.app",
-  messagingSenderId: "131695910432",
-  appId: "1:131695910432:web:87691683281a08b4dd6645",
-  measurementId: "G-CYGTTQ93VW"
+            authDomain: "futebol-72bbe.firebaseapp.com",
+            projectId: "futebol-72bbe",
+            storageBucket: "futebol-72bbe.firebasestorage.app",
+            messagingSenderId: "131695910432",
+            appId: "1:131695910432:web:87691683281a08b4dd6645",
+            measurementId: "G-CYGTTQ93VW"   
         };
         // ==============================================================================
-        // ==============================================================================
-
-
-        let app, db, auth, functions, userId;
+        
+        let app, db, auth, userId; // Removido 'functions'
         let clientesCollection;
-        // Caminho da coleção (simplificado para 'clientes')
         const clientesCollectionPath = `clientes`; 
         const paymentsCollectionPath = `payments`;
         
         // --- Elementos da UI ---
         const cadastroPage = document.getElementById('cadastro-pagina'); // Página 1
         const appPage = document.getElementById('app-pagina');       // Página 2
+        // ... (resto dos elementos da UI sem alteração) ...
         const paywallModal = document.getElementById('paywall-modal'); // Página 3
         const cadastroForm = document.getElementById('cadastro-form');
         const nomeInput = document.getElementById('nome');
@@ -212,13 +202,12 @@
         const paymentInstructionsEl = document.getElementById('payment-instructions');
         
         let paywallTimer;
-        let unsubscribePaymentListener; // Para parar de ouvir o pagamento
-        // --- Fim Elementos da UI ---
+        let unsubscribePaymentListener; 
         
-
         // Função para inicializar e autenticar no Firebase
         async function initializeAuth() {
             try {
+                // ... (Inicialização do App, DB, Auth - sem alteração) ...
                 if (!firebaseConfig.apiKey || firebaseConfig.apiKey.includes("COLE-AQUI")) {
                     throw new Error("Configuração do Firebase não foi preenchida.");
                 }
@@ -226,10 +215,11 @@
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
-                functions = getFunctions(app); // Inicializa as Cloud Functions
+                // functions = getFunctions(app); // REMOVIDO
                 setLogLevel('Debug'); 
                 clientesCollection = collection(db, clientesCollectionPath);
 
+                // ... (Lógica de autenticação - sem alteração) ...
                 await new Promise((resolve, reject) => {
                     const unsubscribe = onAuthStateChanged(auth, async (user) => {
                         unsubscribe(); 
@@ -237,7 +227,6 @@
                             resolve(user); 
                         } else {
                             try {
-                                // Tenta login anônimo (Habilite no seu painel Firebase)
                                 await signInAnonymously(auth);
                                 resolve(auth.currentUser); 
                             } catch (authError) {
@@ -247,14 +236,13 @@
                     });
                 });
 
-                // SUCESSO NA AUTENTICAÇÃO
+                // ... (Sucesso/Falha na autenticação - sem alteração) ...
                 userId = auth.currentUser?.uid || crypto.randomUUID();
                 console.log("Autenticação concluída. Habilitando formulário.");
                 entrarBtn.disabled = false;
                 entrarBtn.textContent = 'Acessar o Jogo';
 
             } catch (e) {
-                // FALHA NA AUTENTICAÇÃO
                 console.error("Erro fatal ao inicializar ou autenticar:", e);
                 errorMsg.textContent = e.message.includes("Configuração") 
                     ? "Erro: A chave do Firebase não foi configurada." 
@@ -270,6 +258,7 @@
 
         // Listener do formulário (PÁGINA 1)
         cadastroForm.addEventListener('submit', async (event) => {
+            // ... (Toda a lógica do formulário de cadastro - sem alteração) ...
             event.preventDefault(); 
             
             if (!nomeInput.value.trim() || !whatsappInput.value.trim()) {
@@ -283,7 +272,6 @@
             errorMsg.classList.add('hidden');
 
             try {
-                // Salva os dados no Firestore
                 const docRef = await addDoc(clientesCollection, {
                     nome: nomeInput.value.trim(),
                     whatsapp: whatsappInput.value.trim(),
@@ -293,11 +281,9 @@
                 
                 console.log("Cliente salvo com ID:", docRef.id);
 
-                // NAVEGAÇÃO: Esconde PÁGINA 1 e Mostra PÁGINA 2
                 cadastroPage.classList.add('hidden');
                 appPage.classList.remove('hidden');
 
-                // Inicia o Timer do Paywall (2 minutos)
                 const doisMinutos = 2 * 60 * 1000;
                 paywallTimer = setTimeout(showPaywall, doisMinutos);
 
@@ -306,12 +292,12 @@
                 errorMsg.textContent = 'Erro ao salvar. Tente novamente.';
                 errorMsg.classList.remove('hidden');
                 entrarBtn.disabled = false;
-                entrarBtn.textContent = 'Acessar o Jogo';
+                entrarBtn.textContent = 'Acesso ao Jogo'; // Corrigido de 'Acessar o Jogo'
             }
         });
 
         // ========================================================================
-        // == NOVA LÓGICA DE PAGAMENTO (MERCADO PAGO)
+        // == NOVA LÓGICA DE PAGAMENTO (BACKEND PRÓPRIO)
         // ========================================================================
 
         // MOSTRA A PÁGINA 3 (Paywall) e inicia a geração do PIX
@@ -320,19 +306,16 @@
                 console.log("Timer esgotado! Mostrando PÁGINA 3.");
                 paywallModal.classList.remove('hidden');
                 
-                // Limpa o listener anterior (se houver)
                 if (unsubscribePaymentListener) {
                     unsubscribePaymentListener();
                 }
 
-                // Inicia o processo de geração do PIX
                 await gerarPagamentoPIX();
             }
         }
 
-        // 1. CHAMA A CLOUD FUNCTION PARA CRIAR O PIX
+        // 1. CHAMA O SEU BACKEND PARA CRIAR O PIX
         async function gerarPagamentoPIX() {
-            // Mostra o spinner
             paymentStatusEl.innerHTML = `
                 <div class="flex flex-col items-center justify-center">
                     <div class="spinner w-12 h-12 border-t-green-400 border-gray-600 rounded-full"></div>
@@ -341,26 +324,39 @@
             paymentInstructionsEl.textContent = "Aguarde, conectando ao sistema de pagamento.";
 
             try {
-                // *** CHAVE DA LÓGICA ***
-                // Chama a Cloud Function que você DEVE criar no Firebase.
-                // O nome 'createPixPayment' é um exemplo.
-                const createPix = httpsCallable(functions, 'createPixPayment');
-                
-                // Envia dados para a função (ex: valor, item, ID do usuário)
-                const result = await createPix({ 
-                    amount: 1.00, // Ex: 1 Real
-                    description: 'Acesso Jogo Ao Vivo',
-                    userId: userId 
+                // ===================================================================
+                // == IMPORTANTE: COLE A URL DO SEU BACKEND AQUI ==
+                // ===================================================================
+                // Esta URL deve apontar para o seu servidor (Node.js, etc.)
+                const SEU_BACKEND_URL = "https://COLE.AQUI.A.URL/do/seu/backend/criar-pix"; 
+                // ===================================================================
+
+                const response = await fetch(SEU_BACKEND_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        amount: 12.00, // Ex: 12 Reais
+                        description: 'Acesso Jogo Ao Vivo',
+                        userId: userId 
+                    })
                 });
 
-                // A Cloud Function DEVE retornar o ID do pagamento e o QR Code
-                const { paymentId, qrCodeBase64 } = result.data;
-                
-                if (!paymentId || !qrCodeBase64) {
-                    throw new Error("Resposta inválida da Cloud Function.");
+                if (!response.ok) {
+                    throw new Error(`Erro na API do backend: ${response.statusText}`);
                 }
 
-                console.log("PIX Gerado. Payment ID:", paymentId);
+                // Seu backend DEVE retornar um JSON com:
+                // 1. paymentId (o ID do documento salvo no Firestore)
+                // 2. qrCodeBase64 (a imagem do QR Code em base64)
+                const { paymentId, qrCodeBase64 } = await response.json();
+
+                if (!paymentId || !qrCodeBase64) {
+                    throw new Error("Resposta inválida do seu backend. Precisa de 'paymentId' e 'qrCodeBase64'.");
+                }
+
+                console.log("PIX Gerado (via backend próprio). Payment ID:", paymentId);
                 
                 // 2. MOSTRA O QR CODE REAL
                 paymentStatusEl.innerHTML = `
@@ -368,29 +364,29 @@
                 `;
                 paymentInstructionsEl.textContent = "Aguardando pagamento... (Escaneie o código)";
 
-                // 3. COMEÇA A OUVIR O PAGAMENTO
+                // 3. COMEÇA A OUVIR O PAGAMENTO (no Firebase)
+                // (Seu backend DEVE escrever no Firestore)
                 listenForPayment(paymentId);
 
             } catch (error) {
-                console.error("Erro ao gerar PIX:", error);
+                console.error("Erro ao gerar PIX (backend próprio):", error);
                 paymentStatusEl.innerHTML = `<span class="text-red-400">Erro ao gerar cobrança. Tente atualizar.</span>`;
                 paymentInstructionsEl.textContent = "Houve um erro no sistema de pagamento.";
             }
         }
 
-        // 4. OUVE O DOCUMENTO NO FIRESTORE (QUE O WEBHOOK VAI ATUALIZAR)
+        // 4. OUVE O DOCUMENTO NO FIRESTORE (QUE O WEBHOOK DO SEU BACKEND VAI ATUALIZAR)
+        // (Esta função permanece IGUAL, pois ela escuta o Firebase)
         function listenForPayment(paymentId) {
             console.log("Ouvindo documento:", `${paymentsCollectionPath}/${paymentId}`);
             
             const paymentDocRef = doc(db, paymentsCollectionPath, paymentId);
             
-            // Salva a função 'unsubscribe' para poder parar de ouvir depois
             unsubscribePaymentListener = onSnapshot(paymentDocRef, (doc) => {
                 if (doc.exists()) {
                     const paymentData = doc.data();
                     console.log("Status do pagamento:", paymentData.status);
                     
-                    // O seu Webhook (no servidor) deve atualizar este campo
                     if (paymentData.status === 'approved' || paymentData.status === 'APROVADO') {
                         // 5. PAGAMENTO APROVADO!
                         paymentStatusEl.innerHTML = `
@@ -400,31 +396,29 @@
                             </div>`;
                         paymentInstructionsEl.textContent = "Liberando o acesso...";
                         
-                        // Para de ouvir
                         unsubscribePaymentListener();
                         
-                        // Fecha o modal e libera o vídeo
-                        setTimeout(hidePaywall, 2000); // Espera 2s para o usuário ler
+                        setTimeout(hidePaywall, 2000); 
                     }
                 } else {
                     console.log("Documento de pagamento (ainda) não existe.");
                 }
             }, (error) => {
                 console.error("Erro ao ouvir pagamento:", error);
-                // Não trava o usuário, mas loga o erro
             });
         }
 
         // Função que ESCONDE A PÁGINA 3 (Paywall)
+        // (Esta função permanece IGUAL)
         function hidePaywall() {
             console.log("Pagamento confirmado. Escondendo PÁGINA 3.");
-            paywallModal.classList.add('hidden'); // ESCONDE A JANELA
+            paywallModal.classList.add('hidden'); 
             
             if (paywallTimer) {
                 clearTimeout(paywallTimer);
             }
             if (unsubscribePaymentListener) {
-                unsubscribePaymentListener(); // Garante que parou de ouvir
+                unsubscribePaymentListener(); 
             }
         }
 
@@ -432,4 +426,3 @@
 
 </body>
 </html>
-
